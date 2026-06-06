@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brainrot Games</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0f;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a0a2e, #16213e);
+      border-bottom: 1px solid #7c3aed33;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      background: linear-gradient(90deg, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header .brain-icon { font-size: 32px; }
+
+    .cdn-status {
+      margin: 0 40px;
+      padding: 12px 20px;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .cdn-status .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ef4444;
+      flex-shrink: 0;
+    }
+
+    .cdn-status.configured .dot { background: #22c55e; }
+
+    .cdn-status code {
+      background: #0a0a0f;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #a855f7;
+    }
+
+    .cdn-status a {
+      color: #a855f7;
+      text-decoration: none;
+      margin-left: auto;
+      font-size: 12px;
+    }
+
+    .cdn-status a:hover { text-decoration: underline; }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      padding: 40px;
+    }
+
+    .game-card {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border: 1px solid #7c3aed33;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .game-card:hover {
+      transform: translateY(-4px);
+      border-color: #7c3aed;
+      box-shadow: 0 8px 32px #7c3aed33;
+    }
+
+    .game-card .thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #111;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+
+    .game-card:hover .thumb img {
+      transform: scale(1.05);
+    }
+
+    .game-card .thumb .badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #7c3aed;
+      color: white;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .game-card .info {
+      padding: 20px;
+    }
+
+    .game-card .info h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, #c084fc, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .game-card .info p {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .game-card .info .play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: white;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .game-card:hover .play-btn { opacity: 0.9; }
+
+    .setup-box {
+      margin: 0 40px 40px;
+      background: #1a1a2e;
+      border: 1px solid #7c3aed44;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .setup-box h2 {
+      font-size: 16px;
+      color: #a855f7;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .setup-box ol {
+      list-style: none;
+      counter-reset: step;
+    }
+
+    .setup-box ol li {
+      counter-increment: step;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #aaa;
+      align-items: flex-start;
+    }
+
+    .setup-box ol li::before {
+      content: counter(step);
+      background: #7c3aed;
+      color: white;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .setup-box code {
+      background: #0a0a0f;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #c084fc;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="brain-icon">🧠</span>
+  <h1>Brainrot Games</h1>
+</header>
+
+<div class="cdn-status" id="cdnStatus">
+  <div class="dot"></div>
+  <span id="cdnStatusText">CDN未設定 — <code>public/config.js</code> にGitHub情報を入力してください</span>
+  <a href="#setup">設定方法を見る ↓</a>
+</div>
+
+<div class="games-grid">
+  <a class="game-card" href="steal-brainrot-duel.html">
+    <div class="thumb">
+      <img src="https://freezenova.com/lessons/img/steal-brainrot-duel-2.webp" alt="Steal Brainrot Duel" onerror="this.style.display='none'">
+      <span class="badge">Unity WebGL</span>
+    </div>
+    <div class="info">
+      <h2>Steal Brainrot Duel</h2>
+      <p>ミームキャラクターを集めて相手の基地を奇襲！素早い判断と戦略が鍵の対戦ゲーム。</p>
+      <span class="play-btn">▶ プレイ</span>
+    </div>
+  </a>
+
+  <a class="game-card" href="steal-brainrot-heist.html">
+    <div class="thumb">
+      <img src="https://freezenova.com/lessons/img2/steal-brainrot-heist-2.webp" alt="Steal Brainrot Heist" onerror="this.style.display='none'">
+      <span class="badge">Unity WebGL</span>
+    </div>
+    <div class="info">
+      <h2>Steal Brainrot Heist</h2>
+      <p>ブレインロットキャラたちと一緒に大胆な強盗を計画・実行する戦略アクションゲーム。</p>
+      <span class="play-btn">▶ プレイ</span>
+    </div>
+  </a>
+
+  <a class="game-card" href="steal-a-brainrot.html">
+    <div class="thumb">
+      <img src="https://freezenova.com/lessons/img/steal-a-brainrot.jpg" alt="Steal a Brainrot" onerror="this.style.display='none'">
+      <span class="badge">Unity WebGL</span>
+    </div>
+    <div class="info">
+      <h2>Steal a Brainrot</h2>
+      <p>ウイルス的なブレインロットキャラを盗み出せ！ユニークなスタイルの収集ゲーム。</p>
+      <span class="play-btn">▶ プレイ</span>
+    </div>
+  </a>
+</div>
+
+<div class="setup-box" id="setup">
+  <h2>⚙️ セットアップ手順</h2>
+  <ol>
+    <li>
+      <span><code>hosting-repo/</code> フォルダをGitHubの新しいリポジトリにpushする<br>（例: <code>brainrot-game-files</code> という名前で作成）</span>
+    </li>
+    <li>
+      <span>jsDelivr CDNはGitHubリポジトリを自動で配信します。<br>URL形式: <code>https://cdn.jsdelivr.net/gh/ユーザー名/リポジトリ名@main/</code></span>
+    </li>
+    <li>
+      <span><code>player-app/public/config.js</code> を開き、<code>YOUR_USERNAME</code> と <code>brainrot-game-files</code> を実際の値に変更する</span>
+    </li>
+    <li>
+      <span>ページをリロードすると、CDN設定済みになりゲームがプレイできます！</span>
+    </li>
+  </ol>
+</div>
+
+<script src="config.js"></script>
+<script>
+  const configured = window.CDN_BASE && !window.CDN_BASE.includes('YOUR_USERNAME');
+  const status = document.getElementById('cdnStatus');
+  const text = document.getElementById('cdnStatusText');
+  if (configured) {
+    status.classList.add('configured');
+    text.innerHTML = `CDN設定済み: <code>${window.CDN_BASE}</code>`;
+    status.querySelector('a').remove();
+  }
+</script>
+</body>
+</html>
