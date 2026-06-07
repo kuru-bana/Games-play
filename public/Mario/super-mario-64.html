@@ -72,12 +72,13 @@
   var providers = window.CDN_PROVIDERS;
   var idx = 0;
 
+  function showError() {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('error-screen').style.display = 'flex';
+  }
+
   function tryLoad() {
-    if (idx >= providers.length) {
-      document.getElementById('loading-screen').style.display = 'none';
-      document.getElementById('error-screen').style.display = 'flex';
-      return;
-    }
+    if (idx >= providers.length) { showError(); return; }
     var base = providers[idx++];
     var prefix = base + '/super-mario-64/game/';
     document.getElementById('cdn-label').textContent =
@@ -90,15 +91,15 @@
       postRun: [],
       print: function(text) { console.log(text); },
       printErr: function(text) { console.error(text); },
-      onAbort: function() {}
+      onAbort: function() { showError(); },
+      onRuntimeInitialized: function() {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('game-wrap').style.display = 'flex';
+      }
     };
 
     var s = document.createElement('script');
     s.src = prefix + 'sm64.js';
-    s.onload = function() {
-      document.getElementById('loading-screen').style.display = 'none';
-      document.getElementById('game-wrap').style.display = 'flex';
-    };
     s.onerror = function() { tryLoad(); };
     document.body.appendChild(s);
   }
