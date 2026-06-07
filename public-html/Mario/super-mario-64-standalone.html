@@ -69,8 +69,10 @@ function tryLoad() {
     printErr: function(t) { console.error(t); },
     onAbort: function() { showError(); },
     onRuntimeInitialized: function() {
-      document.getElementById('loading-screen').style.display = 'none';
-      document.getElementById('game-wrap').style.display = 'flex';
+      setTimeout(function() {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('game-wrap').style.display = 'flex';
+      }, 1000);
     }
   };
 
