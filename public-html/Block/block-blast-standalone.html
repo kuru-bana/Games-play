@@ -25,7 +25,7 @@
     #loading-screen .progress-fill { height: 100%; background: linear-gradient(90deg, #fbbf24, #f97316); width: 0%; transition: width 0.2s; border-radius: 3px; }
     #loading-screen .pct { font-family: monospace; color: #a06020; font-size: 13px; }
     #loading-screen .cdn-label { font-family: monospace; color: #4a2500; font-size: 11px; }
-    div#gameContainer { background: transparent !important; position: absolute; top: 0 !important; width: 100% !important; height: 100% !important; left: 0 !important; }
+    div#gameContainer { background: transparent !important; position: absolute; top: 0 !important; width: 100% !important; height: 100% !important; left: 0 !important; visibility: hidden; opacity: 0; }
     div#gameContainer canvas { position: absolute; width: 100% !important; height: 100% !important; }
   </style>
 </head>
@@ -37,7 +37,7 @@
   <div class="pct" id="pct">0%</div>
   <div class="cdn-label" id="cdn-label">CDNに接続中...</div>
 </div>
-<div id="gameContainer" style="display:none;">
+<div id="gameContainer">
   <canvas id="unity-canvas" data-pixel-art=""></canvas>
 </div>
 <script>
@@ -78,9 +78,13 @@ loadWithFallback('/block-blast/Build/game.loader.js',
     config.frameworkUrl = B + '/game.framework.js.unityweb';
     config.codeUrl      = B + '/game.wasm.unityweb';
     createUnityInstance(canvas, config, progressHandler).then(function(inst) {
-      document.getElementById('loading-screen').style.display = 'none';
-      document.getElementById('gameContainer').style.display = 'block';
       window.gameInstance = inst;
+      setTimeout(function() {
+        document.getElementById('loading-screen').style.display = 'none';
+        var gc = document.getElementById('gameContainer');
+        gc.style.visibility = 'visible';
+        gc.style.opacity = '1';
+      }, 1000);
     }).catch(function(e) { console.error(e); });
   },
   function() {
