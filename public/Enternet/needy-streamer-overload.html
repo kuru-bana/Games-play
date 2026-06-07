@@ -6,7 +6,7 @@
   <title>NEEDY STREAMER OVERLOAD</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; background: #000d00; overflow: hidden; }
+    html, body { width: 100%; height: 100%; background: #120b12; overflow: hidden; }
     #back-btn {
       position: fixed; top: 12px; left: 12px; z-index: 1000;
       background: rgba(0,0,0,0.75); color: #fff; border: 1px solid #22c55e;
@@ -15,126 +15,130 @@
       transition: background 0.2s;
     }
     #back-btn:hover { background: #15803d; }
-    #loading-screen {
-      position: fixed; inset: 0; background: #000d00;
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 20px; z-index: 100;
+    #canvas {
+      width: 100%;
+      height: 100vh;
+      display: block;
     }
-    #loading-screen .thumb {
+    #loader {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      background: #120b12;
+      z-index: 100;
+    }
+    #loader.hide { display: none; }
+    #loader .thumb {
       width: 280px; height: 158px; object-fit: cover; border-radius: 12px;
       border: 2px solid #22c55e55; box-shadow: 0 4px 24px #22c55e44;
     }
-    #loading-screen h2 {
+    #loader h2 {
       font-family: 'Segoe UI', sans-serif; font-size: 22px;
       background: linear-gradient(90deg, #4ade80, #22c55e);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    #loading-screen .progress-wrap { width: 300px; height: 6px; background: #001500; border-radius: 3px; overflow: hidden; }
-    #loading-screen .progress-fill {
+    #unity-progress-bar-empty {
+      width: 300px; height: 6px; background: #001500; border-radius: 3px; overflow: hidden;
+    }
+    #unity-progress-bar-full {
       height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e);
       width: 0%; transition: width 0.3s; border-radius: 3px;
     }
-    #loading-screen .pct { font-family: monospace; color: #2a6a2a; font-size: 13px; }
-    #loading-screen .cdn-label { font-family: monospace; color: #1a4a1a; font-size: 11px; }
+    #pct { font-family: monospace; color: #2a6a2a; font-size: 13px; }
+    #cdn-label { font-family: monospace; color: #1a4a1a; font-size: 11px; }
     #error-screen {
-      position: fixed; inset: 0; background: #000d00;
+      position: fixed; inset: 0; background: #120b12;
       display: none; flex-direction: column; align-items: center;
       justify-content: center; gap: 16px; z-index: 200;
       font-family: 'Segoe UI', sans-serif; text-align: center;
     }
-    div#gameContainer {
-      background: transparent !important; position: absolute;
-      top: 0 !important; width: 100% !important; height: 100% !important; left: 0 !important;
-      visibility: hidden; opacity: 0;
-    }
-    div#gameContainer canvas { position: absolute; width: 100% !important; height: 100% !important; }
   </style>
 </head>
 <body>
 <a href="index.html" id="back-btn">← Enternet 一覧</a>
-<div id="loading-screen">
+
+<canvas id="canvas"></canvas>
+
+<div id="loader">
   <img class="thumb" src="https://cdn.akamai.steamstatic.com/steam/apps/1451940/header.jpg" alt="NEEDY STREAMER OVERLOAD" onerror="this.style.display='none'">
   <h2>💻 NEEDY STREAMER OVERLOAD</h2>
-  <div class="progress-wrap"><div class="progress-fill" id="pf"></div></div>
-  <div class="pct" id="pct">0%</div>
-  <div class="cdn-label" id="cdn-label">ローダーを取得中...</div>
+  <div id="unity-progress-bar-empty"><div id="unity-progress-bar-full"></div></div>
+  <div id="pct">0%</div>
+  <div id="cdn-label">ローダーを取得中...</div>
 </div>
+
 <div id="error-screen">
   <h2 style="color:#ef4444;font-size:20px;">⚠️ 読み込みに失敗しました</h2>
-  <p style="color:#888;font-size:14px;">nso_fix のデータファイルを取得できませんでした。<br>サーバーログを確認してください。</p>
+  <p style="color:#888;font-size:14px;">ゲームデータを取得できませんでした。</p>
 </div>
-<div id="gameContainer">
-  <canvas id="unity-canvas" data-pixel-art=""></canvas>
-</div>
+
 <script>
 (function() {
-  var canvas = document.getElementById('unity-canvas');
-  var config = { streamingAssetsUrl: 'StreamingAssets' };
+  var canvas = document.getElementById('canvas');
+  var loader = document.getElementById('loader');
+  var progressBarFull = document.getElementById('unity-progress-bar-full');
 
-  var LFS_PROXY = '/lfs-proxy/kuru-bana/Games/main/nso_fix/Build';
+  var LFS_BASE = '/lfs-proxy/kuru-bana/Games/main/nso_fix/Build';
 
-  var LOADER_BASES = [
-    'https://cdn.jsdelivr.net/gh/kuru-bana/Games@main',
-    'https://raw.githubusercontent.com/kuru-bana/Games/main',
-    'https://github.com/kuru-bana/Games/raw/main'
-  ];
+  var config = {
+    dataUrl:      LFS_BASE + '/nsoweather2.data.unityweb',
+    frameworkUrl: LFS_BASE + '/nsoweather2.framework.js.unityweb',
+    codeUrl:      LFS_BASE + '/nsoweather2.wasm.unityweb',
+    streamingAssetsUrl: 'StreamingAssets',
+    companyName: 'WSS playground',
+    productName: 'Windose',
+    productVersion: '1.4.0',
+  };
 
   function showError() {
-    document.getElementById('loading-screen').style.display = 'none';
+    loader.classList.add('hide');
     document.getElementById('error-screen').style.display = 'flex';
   }
 
   function onResize() {
-    var w = window.innerWidth, h = window.innerHeight;
-    canvas.style.width = canvas.parentElement.style.width = w + 'px';
-    canvas.style.height = canvas.parentElement.style.height = h + 'px';
+    canvas.style.width  = window.innerWidth  + 'px';
+    canvas.style.height = window.innerHeight + 'px';
   }
+  onResize();
+  window.addEventListener('resize', onResize);
 
-  function progressHandler(progress) {
-    var pct = Math.round(progress * 100);
-    document.getElementById('pf').style.width = pct + '%';
-    document.getElementById('pct').textContent = pct + '%';
-  }
-
-  function launchGame() {
-    onResize();
-    document.getElementById('cdn-label').textContent = 'LFS データをサーバー経由で取得中 (data: 370MB)...';
-    config.dataUrl      = LFS_PROXY + '/nsoweather2.data.unityweb';
-    config.frameworkUrl = LFS_PROXY + '/nsoweather2.framework.js.unityweb';
-    config.codeUrl      = LFS_PROXY + '/nsoweather2.wasm.unityweb';
-    createUnityInstance(canvas, config, progressHandler).then(function(instance) {
-      window.gameInstance = instance;
-      setTimeout(function() {
-        document.getElementById('loading-screen').style.display = 'none';
-        var gc = document.getElementById('gameContainer');
-        gc.style.visibility = 'visible';
-        gc.style.opacity = '1';
-        onResize();
-      }, 1000);
-    }).catch(function(err) {
-      console.error('Unity error:', err);
-      showError();
-    });
-  }
-
+  var LOADER_BASES = [
+    '/gh-proxy/kuru-bana/Games/main',
+    'https://raw.githubusercontent.com/kuru-bana/Games/main',
+    'https://github.com/kuru-bana/Games/raw/main'
+  ];
   var idx = 0;
+
   function tryLoader() {
     if (idx >= LOADER_BASES.length) { showError(); return; }
     var base = LOADER_BASES[idx++];
-    document.getElementById('cdn-label').textContent =
-      (base.includes('jsdelivr') ? 'jsDelivr' : 'GitHub') + ' からローダー取得中...';
+    document.getElementById('cdn-label').textContent = 'ローダー取得中...';
     var s = document.createElement('script');
     s.src = base + '/nso_fix/Build/nsoweather2.loader.js';
     s.onload = function() {
       if (typeof createUnityInstance !== 'function') { tryLoader(); return; }
-      launchGame();
+      document.getElementById('cdn-label').textContent = 'ゲームデータ読み込み中 (約370MB)...';
+      createUnityInstance(canvas, config, function(progress) {
+        var pct = Math.round(progress * 100);
+        progressBarFull.style.width = pct + '%';
+        document.getElementById('pct').textContent = pct + '%';
+      }).then(function(instance) {
+        window.gameInstance = instance;
+        loader.classList.add('hide');
+      }).catch(function(err) {
+        console.error('Unity error:', err);
+        showError();
+      });
     };
     s.onerror = tryLoader;
     document.body.appendChild(s);
   }
 
   tryLoader();
-  window.addEventListener('resize', onResize);
 })();
 </script>
 </body>
