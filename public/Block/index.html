@@ -3,100 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Block Blast</title>
+  <title>Block Games</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; background: #100800; overflow: hidden; }
-    #back-btn {
-      position: fixed; top: 12px; left: 12px; z-index: 1000;
-      background: rgba(0,0,0,0.75); color: #fff; border: 1px solid #f59732;
-      padding: 8px 16px; border-radius: 8px; font-size: 13px;
-      cursor: pointer; text-decoration: none; font-family: 'Segoe UI', sans-serif;
-      transition: background 0.2s;
+    body { background: #0a0600; color: #fff; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+    header {
+      background: linear-gradient(135deg, #1a0e00, #2a1600);
+      border-bottom: 1px solid #f5973222;
+      padding: 20px 40px; display: flex; align-items: center; gap: 16px;
     }
-    #back-btn:hover { background: #f59732; color: #000; }
-    #loading-screen {
-      position: fixed; inset: 0; background: #100800;
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 20px; z-index: 100;
-    }
-    #loading-screen .thumb {
-      width: 280px; height: 158px; object-fit: cover; border-radius: 12px;
-      border: 2px solid #f5973255; box-shadow: 0 4px 24px #f5973244;
-    }
-    #loading-screen h2 {
-      font-family: 'Segoe UI', sans-serif; font-size: 22px;
+    header .back { color: #fbbf24; text-decoration: none; font-size: 13px; opacity: 0.7; transition: opacity 0.2s; }
+    header .back:hover { opacity: 1; }
+    header h1 {
+      font-size: 28px;
       background: linear-gradient(90deg, #fbbf24, #f97316);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    #loading-screen .progress-wrap { width: 300px; height: 6px; background: #2a1500; border-radius: 3px; overflow: hidden; }
-    #loading-screen .progress-fill {
-      height: 100%; background: linear-gradient(90deg, #fbbf24, #f97316);
-      width: 0%; transition: width 0.2s; border-radius: 3px;
+    header .icon { font-size: 32px; }
+    .games-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px; padding: 40px; max-width: 1200px; margin: 0 auto;
     }
-    #loading-screen .pct { font-family: monospace; color: #a06020; font-size: 13px; }
-    #loading-screen .cdn-label { font-family: monospace; color: #4a2500; font-size: 11px; }
-    #error-screen {
-      position: fixed; inset: 0; background: #100800;
-      display: none; flex-direction: column; align-items: center;
-      justify-content: center; gap: 16px; z-index: 200;
-      font-family: 'Segoe UI', sans-serif; text-align: center;
+    .game-card {
+      background: linear-gradient(135deg, #1a0e00, #2a1600);
+      border: 1px solid #f5973222; border-radius: 16px; overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      text-decoration: none; color: inherit; display: block;
     }
-    div#gameContainer {
-      background: transparent !important; position: absolute;
-      top: 0 !important; width: 100% !important; height: 100% !important; left: 0 !important;
+    .game-card:hover { transform: translateY(-4px); border-color: #f59732; box-shadow: 0 8px 32px #f5973233; }
+    .game-card .thumb { width: 100%; aspect-ratio: 16/9; background: #150900; position: relative; overflow: hidden; }
+    .game-card .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s; }
+    .game-card:hover .thumb img { transform: scale(1.05); }
+    .game-card .thumb .badge {
+      position: absolute; top: 12px; right: 12px; background: #f59732; color: #000;
+      font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600;
     }
-    div#gameContainer canvas { position: absolute; width: 100% !important; height: 100% !important; }
+    .game-card .info { padding: 20px; }
+    .game-card .info h2 {
+      font-size: 18px; margin-bottom: 8px;
+      background: linear-gradient(90deg, #fbbf24, #f97316);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .game-card .info p { font-size: 13px; color: #8a6a30; line-height: 1.6; margin-bottom: 16px; }
+    .game-card .info .play-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #b45309, #c2410c);
+      color: white; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: opacity 0.2s;
+    }
+    .game-card:hover .play-btn { opacity: 0.9; }
   </style>
 </head>
 <body>
-<a href="../index.html" id="back-btn">← ポータルトップ</a>
-<div id="loading-screen">
-  <img class="thumb" src="https://freezenova.com/lessons/img/block-blast.jpg" alt="Block Blast" onerror="this.style.display='none'">
-  <h2>🧱 Block Blast</h2>
-  <div class="progress-wrap"><div class="progress-fill" id="pf"></div></div>
-  <div class="pct" id="pct">0%</div>
-  <div class="cdn-label" id="cdn-label">CDNに接続中...</div>
-</div>
-<div id="error-screen">
-  <h2 style="color:#ef4444;font-size:20px;">⚠️ 読み込みに失敗しました</h2>
-  <p style="color:#888;font-size:14px;">jsDelivr・GitHub Raw どちらも応答なし</p>
-</div>
-<div id="gameContainer" style="display:none;">
-  <canvas id="unity-canvas" data-pixel-art=""></canvas>
-</div>
-<script src="../config.js"></script>
-<script>
-(function() {
-  var canvas = document.getElementById('unity-canvas');
-  var config = { streamingAssetsUrl: 'StreamingAssets' };
+<header>
+  <span class="icon">🧱</span>
+  <h1>Block Games</h1>
+  <a class="back" href="../index.html" style="margin-left:auto">← ポータルトップ</a>
+</header>
+<div class="games-grid">
 
-  function progressHandler(progress) {
-    var pct = Math.round(progress * 100);
-    document.getElementById('pf').style.width = pct + '%';
-    document.getElementById('pct').textContent = pct + '%';
-  }
+  <a class="game-card" href="block-blast.html">
+    <div class="thumb">
+      <img src="https://freezenova.com/lessons/img/block-blast.jpg" alt="Block Blast" onerror="this.style.display='none'">
+      <span class="badge">Unity 3D</span>
+    </div>
+    <div class="info">
+      <h2>Block Blast</h2>
+      <p>ブロックを配置してラインを消していく本格パズルゲーム。積み上げすぎると終了！</p>
+      <span class="play-btn">▶ プレイ</span>
+    </div>
+  </a>
 
-  window.loadWithFallback('/block-blast/Build/game.loader.js',
-    function(base) {
-      document.getElementById('cdn-label').textContent =
-        (base.includes('jsdelivr') ? 'jsDelivr' : 'GitHub Raw') + ' から読み込み中...';
-      var B = base + '/block-blast/Build';
-      config.dataUrl      = B + '/game.data.unityweb';
-      config.frameworkUrl = B + '/game.framework.js.unityweb';
-      config.codeUrl      = B + '/game.wasm.unityweb';
-      createUnityInstance(canvas, config, progressHandler).then(function(instance) {
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('gameContainer').style.display = 'block';
-        window.gameInstance = instance;
-      }).catch(function(err) { console.error('Unity error:', err); });
-    },
-    function() {
-      document.getElementById('loading-screen').style.display = 'none';
-      document.getElementById('error-screen').style.display = 'flex';
-    }
-  );
-})();
-</script>
+  <a class="game-card" href="/games/blocky-puzzle/">
+    <div class="thumb">
+      <img src="https://freezenova.com/lessons/img/blocky-puzzle.jpg" alt="Blocky Puzzle" onerror="this.style.display='none'">
+      <span class="badge">Puzzle</span>
+    </div>
+    <div class="info">
+      <h2>Blocky Puzzle</h2>
+      <p>カラフルなブロックをぴったりはめ込む木製パズルゲーム。シンプルだけど奥が深い！</p>
+      <span class="play-btn">▶ プレイ</span>
+    </div>
+  </a>
+
+</div>
 </body>
 </html>
