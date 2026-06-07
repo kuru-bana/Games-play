@@ -69,8 +69,10 @@
   function showGame() {
     if (started) return;
     started = true;
-    document.getElementById('loading-screen').style.display = 'none';
-    document.getElementById('gameContainer').style.display = 'block';
+    setTimeout(function() {
+      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('gameContainer').style.display = 'block';
+    }, 1000);
   }
   function showError() {
     document.getElementById('loading-screen').style.display = 'none';
