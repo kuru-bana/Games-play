@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NSO Test - selenite.cc direct</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #120b12; overflow: hidden; }
+    #back-btn {
+      position: fixed; top: 12px; left: 12px; z-index: 1000;
+      background: rgba(0,0,0,0.75); color: #fff; border: 1px solid #22c55e;
+      padding: 8px 16px; border-radius: 8px; font-size: 13px;
+      cursor: pointer; text-decoration: none; font-family: 'Segoe UI', sans-serif;
+    }
+    #canvas { width: 100%; height: 100vh; display: block; }
+    #loader {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+      background: #120b12; z-index: 100;
+    }
+    #loader.hide { display: none; }
+    #loader h2 {
+      font-family: 'Segoe UI', sans-serif; font-size: 22px;
+      background: linear-gradient(90deg, #4ade80, #22c55e);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    #bar-wrap { width: 300px; height: 6px; background: #001500; border-radius: 3px; overflow: hidden; }
+    #bar { height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e); width: 0%; transition: width 0.3s; }
+    #pct { font-family: monospace; color: #4ade80; font-size: 14px; }
+    #status { font-family: monospace; color: #1a4a1a; font-size: 11px; }
+  </style>
+</head>
+<body>
+<a href="index.html" id="back-btn">← トップ</a>
+<canvas id="canvas"></canvas>
+<div id="loader">
+  <h2>💻 NEEDY STREAMER OVERLOAD</h2>
+  <div id="bar-wrap"><div id="bar"></div></div>
+  <div id="pct">0%</div>
+  <div id="status">selenite.cc からロード中...</div>
+</div>
+
+<script>
+(function() {
+  var BASE = 'https://selenite.cc/resources/semag/nso_fix/Build';
+  var canvas = document.getElementById('canvas');
+  var loader = document.getElementById('loader');
+
+  function onResize() {
+    canvas.style.width  = window.innerWidth  + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+  }
+  onResize();
+  window.addEventListener('resize', onResize);
+
+  var config = {
+    dataUrl:            BASE + '/nsoweather2.data.unityweb',
+    frameworkUrl:       BASE + '/nsoweather2.framework.js.unityweb',
+    codeUrl:            BASE + '/nsoweather2.wasm.unityweb',
+    streamingAssetsUrl: 'StreamingAssets',
+    companyName: 'WSS playground',
+    productName: 'Windose',
+    productVersion: '1.4.0',
+  };
+
+  var s = document.createElement('script');
+  s.src = BASE + '/nsoweather2.loader.js';
+  s.onload = function() {
+    document.getElementById('status').textContent = 'ゲームデータ読み込み中 (369MB)...';
+    createUnityInstance(canvas, config, function(progress) {
+      var pct = Math.round(progress * 100);
+      document.getElementById('bar').style.width = pct + '%';
+      document.getElementById('pct').textContent = pct + '%';
+    }).then(function(instance) {
+      window.gameInstance = instance;
+      loader.classList.add('hide');
+    }).catch(function(err) {
+      document.getElementById('status').textContent = 'エラー: ' + err;
+      console.error(err);
+    });
+  };
+  s.onerror = function() {
+    document.getElementById('status').textContent = 'loader.js の取得に失敗';
+  };
+  document.body.appendChild(s);
+})();
+</script>
+</body>
+</html>
