@@ -87,17 +87,22 @@
   window.loadWithFallback('/snow-rider/Build/snowrider3d_gd_4_2.loader.js',
     function(base) {
       document.getElementById('cdn-label').textContent =
-        (base.includes('jsdelivr') ? 'jsDelivr' : 'GitHub Raw') + ' から読み込み中...';
+        (base.includes('jsdelivr') ? 'jsDelivr' : 'GitHub') + ' から読み込み中...';
       var B = base + '/snow-rider/Build';
-      config.dataUrl      = B + '/snowrider3d_gd_4_2.data.unityweb';
-      config.frameworkUrl = B + '/snowrider3d_gd_4_2.framework.js.unityweb';
-      config.codeUrl      = B + '/snowrider3d_gd_4_2.wasm.unityweb';
+      config.dataUrl           = B + '/snowrider3d_gd_4_2.data.unityweb';
+      config.frameworkUrl      = B + '/snowrider3d_gd_4_2.framework.js.unityweb';
+      config.codeUrl           = B + '/snowrider3d_gd_4_2.wasm.unityweb';
+      config.streamingAssetsUrl = base + '/snow-rider/StreamingAssets';
       createUnityInstance(canvas, config, progressHandler).then(function(instance) {
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('gameContainer').style.display = 'block';
         onResize();
         window.gameInstance = instance;
-      }).catch(function(err) { console.error('Unity error:', err); });
+      }).catch(function(err) {
+        console.error('Unity error:', err);
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('error-screen').style.display = 'flex';
+      });
     },
     function() {
       document.getElementById('loading-screen').style.display = 'none';
