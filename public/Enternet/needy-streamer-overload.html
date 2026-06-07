@@ -56,11 +56,11 @@
   <h2>💻 NEEDY STREAMER OVERLOAD</h2>
   <div class="progress-wrap"><div class="progress-fill" id="pf"></div></div>
   <div class="pct" id="pct">0%</div>
-  <div class="cdn-label" id="cdn-label">GitHub Raw から読み込み中...</div>
+  <div class="cdn-label" id="cdn-label">ローダーを取得中...</div>
 </div>
 <div id="error-screen">
   <h2 style="color:#ef4444;font-size:20px;">⚠️ 読み込みに失敗しました</h2>
-  <p style="color:#888;font-size:14px;">GitHub Raw からファイルが見つかりませんでした。<br>kuru-bana/Games に nso_fix フォルダを追加してください。</p>
+  <p style="color:#888;font-size:14px;">nso_fix のデータファイルを取得できませんでした。<br>サーバーログを確認してください。</p>
 </div>
 <div id="gameContainer" style="display:none;">
   <canvas id="unity-canvas" data-pixel-art=""></canvas>
@@ -69,8 +69,14 @@
 (function() {
   var canvas = document.getElementById('unity-canvas');
   var config = { streamingAssetsUrl: 'StreamingAssets' };
-  var BASE = 'https://raw.githubusercontent.com/kuru-bana/Games/main';
-  var B = BASE + '/nso_fix/Build';
+
+  var LFS_PROXY = '/lfs-proxy/kuru-bana/Games/main/nso_fix/Build';
+
+  var LOADER_BASES = [
+    'https://cdn.jsdelivr.net/gh/kuru-bana/Games@main',
+    'https://raw.githubusercontent.com/kuru-bana/Games/main',
+    'https://github.com/kuru-bana/Games/raw/main'
+  ];
 
   function showError() {
     document.getElementById('loading-screen').style.display = 'none';
@@ -89,25 +95,39 @@
     document.getElementById('pct').textContent = pct + '%';
   }
 
-  var s = document.createElement('script');
-  s.src = B + '/nsoweather2.loader.js';
-  s.onload = function() {
-    if (typeof createUnityInstance !== 'function') {
-      showError();
-      return;
-    }
-    config.dataUrl      = B + '/nsoweather2.data.unityweb';
-    config.frameworkUrl = B + '/nsoweather2.framework.js.unityweb';
-    config.codeUrl      = B + '/nsoweather2.wasm.unityweb';
+  function launchGame() {
+    document.getElementById('cdn-label').textContent = 'LFS データをサーバー経由で取得中 (data: 370MB)...';
+    config.dataUrl      = LFS_PROXY + '/nsoweather2.data.unityweb';
+    config.frameworkUrl = LFS_PROXY + '/nsoweather2.framework.js.unityweb';
+    config.codeUrl      = LFS_PROXY + '/nsoweather2.wasm.unityweb';
     createUnityInstance(canvas, config, progressHandler).then(function(instance) {
       document.getElementById('loading-screen').style.display = 'none';
       document.getElementById('gameContainer').style.display = 'block';
       onResize();
       window.gameInstance = instance;
-    }).catch(showError);
-  };
-  s.onerror = showError;
-  document.body.appendChild(s);
+    }).catch(function(err) {
+      console.error('Unity error:', err);
+      showError();
+    });
+  }
+
+  var idx = 0;
+  function tryLoader() {
+    if (idx >= LOADER_BASES.length) { showError(); return; }
+    var base = LOADER_BASES[idx++];
+    document.getElementById('cdn-label').textContent =
+      (base.includes('jsdelivr') ? 'jsDelivr' : 'GitHub') + ' からローダー取得中...';
+    var s = document.createElement('script');
+    s.src = base + '/nso_fix/Build/nsoweather2.loader.js';
+    s.onload = function() {
+      if (typeof createUnityInstance !== 'function') { tryLoader(); return; }
+      launchGame();
+    };
+    s.onerror = tryLoader;
+    document.body.appendChild(s);
+  }
+
+  tryLoader();
   window.addEventListener('resize', onResize);
 })();
 </script>
