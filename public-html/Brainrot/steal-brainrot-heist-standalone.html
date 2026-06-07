@@ -71,7 +71,7 @@
       top: 0; left: 0;
       width: 100%;
       height: 100%;
-      display: none;
+      visibility: hidden; opacity: 0;
     }
 
     div#gameContainer canvas {
@@ -149,12 +149,17 @@
       config.dataUrl      = B + '/game.data.unityweb';
       config.frameworkUrl = B + '/game.framework.js.unityweb';
       config.codeUrl      = B + '/game.wasm.unityweb';
+      onResize();
       createUnityInstance(canvas, config, progressHandler).then(function(instance) {
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('gameContainer').style.display = 'block';
-        canvas = instance.Module.canvas;
-        onResize();
         window.gameInstance = instance;
+        setTimeout(function() {
+          document.getElementById('loading-screen').style.display = 'none';
+          var gc = document.getElementById('gameContainer');
+          gc.style.visibility = 'visible';
+          gc.style.opacity = '1';
+          canvas = instance.Module.canvas;
+          onResize();
+        }, 1000);
       }).catch(function(err) { console.error('Unity load error:', err); });
     },
     function() {
