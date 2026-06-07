@@ -175,7 +175,7 @@
     return;
   }
 
-  var BASE = cdn + '/steal-a-brainrot';
+  var BASE = cdn + '/steal-a-brainrot'; // initial, may be updated by fallback
 
   var canvas = document.querySelector('#unity-canvas');
   var config = {
@@ -239,28 +239,28 @@
     document.getElementById('pct').textContent = pct + '%';
   }
 
-  var apiScript = document.createElement('script');
-  apiScript.src = BASE + '/api.js';
-  apiScript.onerror = function() {};
-  document.body.appendChild(apiScript);
-
-  var loaderScript = document.createElement('script');
-  loaderScript.src = BASE + '/dev.js';
-  loaderScript.onload = function() {
-    createUnityInstance(canvas, config, progressHandler).then(function(instance) {
-      document.getElementById('loading-screen').style.display = 'none';
-      document.getElementById('game-wrap').style.display = 'block';
-      window.myGameInstance = instance;
-    }).catch(function(err) {
-      console.error('Unity load error:', err);
-    });
-  };
-  loaderScript.onerror = function() {
-    document.getElementById('loading-screen').innerHTML =
-      '<h2 style="color:#ef4444;font-family:sans-serif;">CDNからの読み込みに失敗しました</h2>' +
-      '<p style="color:#888;font-family:sans-serif;font-size:13px;">GitHubリポジトリがpublicか確認してください</p>';
-  };
-  document.body.appendChild(loaderScript);
+  window.loadWithFallback('/steal-a-brainrot/dev.js',
+    function(activeBase) {
+      var B = activeBase + '/steal-a-brainrot';
+      config.dataUrl      = B + '/devsabd.js';
+      config.frameworkUrl = B + '/devsabf.js';
+      config.codeUrl      = B + '/devsabw.js';
+      var apiScript = document.createElement('script');
+      apiScript.src = B + '/api.js';
+      apiScript.onerror = function() {};
+      document.body.appendChild(apiScript);
+      createUnityInstance(canvas, config, progressHandler).then(function(instance) {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('game-wrap').style.display = 'block';
+        window.myGameInstance = instance;
+      }).catch(function(err) { console.error('Unity load error:', err); });
+    },
+    function() {
+      document.getElementById('loading-screen').innerHTML =
+        '<h2 style="color:#ef4444;font-family:sans-serif;">CDNからの読み込みに失敗しました</h2>' +
+        '<p style="color:#888;font-family:sans-serif;font-size:13px;">jsDelivr・GitHub Raw どちらも応答なし</p>';
+    }
+  );
 
   var leaderboard = null;
 
