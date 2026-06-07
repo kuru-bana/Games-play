@@ -32,9 +32,8 @@
     #loading-screen .progress-wrap { width: 300px; height: 6px; background: #1a0a30; border-radius: 3px; overflow: hidden; }
     #loading-screen .progress-fill {
       height: 100%; background: linear-gradient(90deg, #8b5cf6, #6d28d9);
-      border-radius: 3px; animation: pulse 1.5s ease-in-out infinite;
+      width: 0%; transition: width 0.3s; border-radius: 3px;
     }
-    @keyframes pulse { 0%,100% { width: 20%; } 50% { width: 80%; } }
     #loading-screen .pct { font-family: monospace; color: #7c5cbf; font-size: 13px; }
     #loading-screen .cdn-label { font-family: monospace; color: #2d1060; font-size: 11px; }
     #error-screen {
@@ -52,8 +51,8 @@
 <div id="loading-screen">
   <img class="thumb" src="https://freezenova.com/lessons/hole.io.webp" alt="Hole.io" onerror="this.style.display='none'">
   <h2>🕳️ Hole.io</h2>
-  <div class="progress-wrap"><div class="progress-fill"></div></div>
-  <div class="pct" id="pct">ゲームを読み込み中...</div>
+  <div class="progress-wrap"><div class="progress-fill" id="pf"></div></div>
+  <div class="pct" id="pct">0%</div>
   <div class="cdn-label" id="cdn-label">CDNに接続中...</div>
 </div>
 <div id="error-screen">
@@ -66,53 +65,54 @@
 <script src="../config.js"></script>
 <script>
 (function() {
+  var started = false;
+  function showGame() {
+    if (started) return;
+    started = true;
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('gameContainer').style.display = 'block';
+  }
+  function showError() {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('error-screen').style.display = 'flex';
+  }
+  function ourProgress(instance, progress) {
+    if (typeof progress === 'number') {
+      var pct = Math.round(progress * 100);
+      document.getElementById('pf').style.width = pct + '%';
+      document.getElementById('pct').textContent = pct + '%';
+      if (progress >= 1) showGame();
+    } else if (progress === 'complete') {
+      showGame();
+    }
+  }
+
   window.loadWithFallback('/hole.io/UnityLoader.js',
     function(base) {
       document.getElementById('cdn-label').textContent =
         (base.includes('jsdelivr') ? 'jsDelivr' : 'GitHub Raw') + ' から読み込み中...';
       var B = base + '/hole.io';
-
-      var progressScript = document.createElement('script');
-      progressScript.src = B + '/UnityProgress.js';
-      progressScript.onload = function() {
-        var gameConfig = {
-          companyName: "PlayJolt.com",
-          productName: "HoleIO",
-          dataUrl: B + "/vaxo.data.unityweb",
-          asmCodeUrl: B + "/vaxoio.asm.code.unityweb",
-          asmMemoryUrl: B + "/vaxoio.asm.memory.unityweb",
-          asmFrameworkUrl: B + "/vaxoio.asm.framework.unityweb",
-          TOTAL_MEMORY: 268435456,
-          graphicsAPI: ["WebGL 2.0", "WebGL 1.0"],
-          webglContextAttributes: { preserveDrawingBuffer: false },
-          splashScreenStyle: "Dark",
-          backgroundColor: "#231F20"
-        };
-        var blob = new Blob([JSON.stringify(gameConfig)], { type: 'application/json' });
-        var configUrl = URL.createObjectURL(blob);
-
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('gameContainer').style.display = 'block';
-
-        UnityLoader.instantiate("gameContainer", configUrl, {
-          onProgress: UnityProgress,
-          Module: {
-            onRuntimeInitialized: function() {
-              UnityProgress(this, "complete");
-            }
-          }
-        });
+      var gameConfig = {
+        companyName: "PlayJolt.com",
+        productName: "HoleIO",
+        dataUrl: B + "/vaxo.data.unityweb",
+        asmCodeUrl: B + "/vaxoio.asm.code.unityweb",
+        asmMemoryUrl: B + "/vaxoio.asm.memory.unityweb",
+        asmFrameworkUrl: B + "/vaxoio.asm.framework.unityweb",
+        TOTAL_MEMORY: 268435456,
+        graphicsAPI: ["WebGL 2.0", "WebGL 1.0"],
+        webglContextAttributes: { preserveDrawingBuffer: false },
+        splashScreenStyle: "Dark",
+        backgroundColor: "#231F20"
       };
-      progressScript.onerror = function() {
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('error-screen').style.display = 'flex';
-      };
-      document.body.appendChild(progressScript);
+      var blob = new Blob([JSON.stringify(gameConfig)], { type: 'application/json' });
+      UnityLoader.instantiate("gameContainer", URL.createObjectURL(blob), {
+        onProgress: ourProgress,
+        Module: { onRuntimeInitialized: function() { showGame(); } }
+      });
+      setTimeout(showGame, 60000);
     },
-    function() {
-      document.getElementById('loading-screen').style.display = 'none';
-      document.getElementById('error-screen').style.display = 'flex';
-    }
+    showError
   );
 })();
 </script>
