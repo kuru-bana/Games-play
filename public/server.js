@@ -1,13 +1,15 @@
-{
-  "name": "brainrot-games-player",
-  "version": "1.0.0",
-  "description": "Brainrot Games Player - jsDelivr CDN経由でUnityゲームをプレイ",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2"
-  }
-}
+const express = require('express');
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Brainrot Games Player running on port ${PORT}`);
+});
