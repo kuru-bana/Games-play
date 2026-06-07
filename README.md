@@ -1,0 +1,3 @@
+# proxy必要game(githubrawはfitchは無理) utopiaでも使おうかな...
+- Needy-Streamer-Overload(lfsファイル&cdnによるオブジェクトの重なり)
+- blockypuzzle(cdnによるオブジェクト重なり)
