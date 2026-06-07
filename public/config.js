@@ -1,6 +1,7 @@
 window.CDN_PROVIDERS = [
   "https://cdn.jsdelivr.net/gh/kuru-bana/Games@main",
-  "https://raw.githubusercontent.com/kuru-bana/Games/main"
+  "https://raw.githubusercontent.com/kuru-bana/Games/main",
+  "https://github.com/kuru-bana/Games/raw/main"
 ];
 window.CDN_BASE = window.CDN_PROVIDERS[0];
 
