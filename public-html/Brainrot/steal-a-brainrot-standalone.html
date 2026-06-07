@@ -184,9 +184,11 @@
       apiScript.onerror = function() {};
       document.body.appendChild(apiScript);
       createUnityInstance(canvas, config, progressHandler).then(function(instance) {
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('unity-container').style.display = 'block';
         window.myGameInstance = instance;
+        setTimeout(function() {
+          document.getElementById('loading-screen').style.display = 'none';
+          document.getElementById('unity-container').style.display = 'block';
+        }, 1000);
       }).catch(function(err) { console.error(err); });
     },
     function() {
