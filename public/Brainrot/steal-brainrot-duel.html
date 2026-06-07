@@ -126,6 +126,7 @@
       width: 100% !important;
       height: 100% !important;
       left: 0px !important;
+      visibility: hidden; opacity: 0;
     }
 
     div#gameContainer canvas {
@@ -172,7 +173,7 @@
   <div style="color:#555;font-size:12px;font-family:monospace;">ゲームファイルをCDNから読み込み中...</div>
 </div>
 
-<div id="gameContainer" style="display:none;">
+<div id="gameContainer">
   <canvas id="unity-canvas" data-pixel-art=""></canvas>
 </div>
 
@@ -219,12 +220,17 @@
       config.dataUrl      = B + '/Steal_Brainrot_FreezeNovaV3.data.unityweb';
       config.frameworkUrl = B + '/Steal_Brainrot_FreezeNovaV3.framework.js.unityweb';
       config.codeUrl      = B + '/Steal_Brainrot_FreezeNovaV3.wasm.unityweb';
+      onResize();
       createUnityInstance(canvas, config, progressHandler).then(function(instance) {
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('gameContainer').style.display = 'block';
-        canvas = instance.Module.canvas;
-        onResize();
         window.gameInstance = instance;
+        setTimeout(function() {
+          document.getElementById('loading-screen').style.display = 'none';
+          var gc = document.getElementById('gameContainer');
+          gc.style.visibility = 'visible';
+          gc.style.opacity = '1';
+          canvas = instance.Module.canvas;
+          onResize();
+        }, 1000);
       }).catch(function(err) { console.error('Unity load error:', err); });
     },
     function() {
