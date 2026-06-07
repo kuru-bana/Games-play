@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hole.io</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #0a0010; overflow: hidden; }
+    #back-btn {
+      position: fixed; top: 12px; left: 12px; z-index: 1000;
+      background: rgba(0,0,0,0.75); color: #fff; border: 1px solid #8b5cf6;
+      padding: 8px 16px; border-radius: 8px; font-size: 13px;
+      cursor: pointer; text-decoration: none; font-family: 'Segoe UI', sans-serif;
+      transition: background 0.2s;
+    }
+    #back-btn:hover { background: #8b5cf6; }
+    #loading-screen {
+      position: fixed; inset: 0; background: #0a0010;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 20px; z-index: 100;
+    }
+    #loading-screen .thumb {
+      width: 280px; height: 158px; object-fit: cover; border-radius: 12px;
+      border: 2px solid #8b5cf655; box-shadow: 0 4px 24px #8b5cf644;
+    }
+    #loading-screen h2 {
+      font-family: 'Segoe UI', sans-serif; font-size: 22px;
+      background: linear-gradient(90deg, #a78bfa, #7c3aed);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    #loading-screen .progress-wrap { width: 300px; height: 6px; background: #1a0a30; border-radius: 3px; overflow: hidden; }
+    #loading-screen .progress-fill {
+      height: 100%; background: linear-gradient(90deg, #8b5cf6, #6d28d9);
+      border-radius: 3px; animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { width: 20%; } 50% { width: 80%; } }
+    #loading-screen .pct { font-family: monospace; color: #7c5cbf; font-size: 13px; }
+    #loading-screen .cdn-label { font-family: monospace; color: #2d1060; font-size: 11px; }
+    #error-screen {
+      position: fixed; inset: 0; background: #0a0010;
+      display: none; flex-direction: column; align-items: center;
+      justify-content: center; gap: 16px; z-index: 200;
+      font-family: 'Segoe UI', sans-serif; text-align: center;
+    }
+    .webgl-content { width: 100%; height: 100%; }
+    #gameContainer { width: 100%; height: 100%; display: none; }
+  </style>
+</head>
+<body>
+<a href="../index.html" id="back-btn">← ポータルトップ</a>
+<div id="loading-screen">
+  <img class="thumb" src="https://freezenova.com/lessons/hole.io.webp" alt="Hole.io" onerror="this.style.display='none'">
+  <h2>🕳️ Hole.io</h2>
+  <div class="progress-wrap"><div class="progress-fill"></div></div>
+  <div class="pct" id="pct">ゲームを読み込み中...</div>
+  <div class="cdn-label" id="cdn-label">CDNに接続中...</div>
+</div>
+<div id="error-screen">
+  <h2 style="color:#ef4444;font-size:20px;">⚠️ 読み込みに失敗しました</h2>
+  <p style="color:#888;font-size:14px;">jsDelivr・GitHub Raw どちらも応答なし</p>
+</div>
+<div class="webgl-content">
+  <div id="gameContainer"></div>
+</div>
+<script src="../config.js"></script>
+<script>
+(function() {
+  window.loadWithFallback('/hole.io/UnityLoader.js',
+    function(base) {
+      document.getElementById('cdn-label').textContent =
+        (base.includes('jsdelivr') ? 'jsDelivr' : 'GitHub Raw') + ' から読み込み中...';
+      var B = base + '/hole.io';
+
+      var progressScript = document.createElement('script');
+      progressScript.src = B + '/UnityProgress.js';
+      progressScript.onload = function() {
+        var gameConfig = {
+          companyName: "PlayJolt.com",
+          productName: "HoleIO",
+          dataUrl: B + "/vaxo.data.unityweb",
+          asmCodeUrl: B + "/vaxoio.asm.code.unityweb",
+          asmMemoryUrl: B + "/vaxoio.asm.memory.unityweb",
+          asmFrameworkUrl: B + "/vaxoio.asm.framework.unityweb",
+          TOTAL_MEMORY: 268435456,
+          graphicsAPI: ["WebGL 2.0", "WebGL 1.0"],
+          webglContextAttributes: { preserveDrawingBuffer: false },
+          splashScreenStyle: "Dark",
+          backgroundColor: "#231F20"
+        };
+        var blob = new Blob([JSON.stringify(gameConfig)], { type: 'application/json' });
+        var configUrl = URL.createObjectURL(blob);
+
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('gameContainer').style.display = 'block';
+
+        UnityLoader.instantiate("gameContainer", configUrl, {
+          onProgress: UnityProgress,
+          Module: {
+            onRuntimeInitialized: function() {
+              UnityProgress(this, "complete");
+            }
+          }
+        });
+      };
+      progressScript.onerror = function() {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('error-screen').style.display = 'flex';
+      };
+      document.body.appendChild(progressScript);
+    },
+    function() {
+      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('error-screen').style.display = 'flex';
+    }
+  );
+})();
+</script>
+</body>
+</html>
