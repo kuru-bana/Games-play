@@ -1,86 +1,135 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blocky Puzzle</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; background: #100800; overflow: hidden; }
-    #loading-screen {
-      position: fixed; inset: 0; background: #100800;
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 20px; z-index: 100;
-    }
-    #loading-screen .thumb {
-      width: 280px; height: 158px; object-fit: cover; border-radius: 12px;
-      border: 2px solid #f5973255; box-shadow: 0 4px 24px #f5973244;
-    }
-    #loading-screen h2 {
-      font-family: 'Segoe UI', sans-serif; font-size: 22px;
-      background: linear-gradient(90deg, #fbbf24, #f97316);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    #loading-screen .progress-wrap { width: 300px; height: 6px; background: #2a1500; border-radius: 3px; overflow: hidden; }
-    #loading-screen .progress-fill {
-      height: 100%; background: linear-gradient(90deg, #fbbf24, #f97316);
-      border-radius: 3px; animation: pulse 1.5s ease-in-out infinite;
-    }
-    @keyframes pulse { 0%,100% { width: 20%; } 50% { width: 80%; } }
-    #loading-screen .pct { font-family: monospace; color: #a06020; font-size: 13px; }
-    #loading-screen .cdn-label { font-family: monospace; color: #4a2500; font-size: 11px; }
-    #game-container { width: 100%; height: 100%; display: none; }
-    #game-container ruffle-player { width: 100%; height: 100%; display: block; }
-  </style>
-</head>
-<body>
-<div id="loading-screen">
-  <img class="thumb" src="https://freezenova.com/lessons/img/blocky-puzzle.jpg" alt="Blocky Puzzle" onerror="this.style.display='none'">
-  <h2>🟧 Blocky Puzzle</h2>
-  <div class="progress-wrap"><div class="progress-fill"></div></div>
-  <div class="pct" id="pct">Ruffle を読み込み中...</div>
-  <div class="cdn-label" id="cdn-label">CDNに接続中...</div>
-</div>
-<div id="game-container"></div>
-<script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
-<script>
-var CDN_PROVIDERS = [
-  "https://cdn.jsdelivr.net/gh/kuru-bana/Games@main",
-  "https://raw.githubusercontent.com/kuru-bana/Games/main"
-];
-var idx = 0;
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui, shrink-to-fit=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Blocky Puzzle</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; background: #52aaec; overflow: hidden; }
+      .canvas-app-container { width: 100%; height: 100%; position: absolute; align-items: center; justify-content: center; overflow: hidden; background: #52aaec; }
+      #canvas { outline: none; border: 0; width: 100%; vertical-align: bottom; }
+      #canvas-container { position: relative; }
+      canvas:focus, canvas:active { outline: none; border: 0; }
+      div { -webkit-tap-highlight-color: rgba(0,0,0,0); -webkit-touch-callout: none; user-select: none; }
+      .loading-screen-container { position: absolute; top: 0; left: 0; height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+      .message { height: 30px; display: flex; align-items: center; font-family: Verdana, Helvetica, sans-serif; color: #fff; }
+      .logo { width: 100%; max-width: 256px; height: auto; }
+      .loading-bar { margin-top: 0; width: 180px; display: flex; background: rgba(255,255,255,0.1); }
+      .main-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+      .block { background: linear-gradient(#00df00,#00b400); border-top: 5px solid #00f98b; border-bottom: 5px solid #007d00; border-left: 5px solid #00da00; border-right: 5px solid #009b00; width: 20px; min-width: 20px; height: 20px; min-height: 20px; box-shadow: 1px 2px 36px #ffffff7a; opacity: 0; animation: fadeInOut 3s linear 0s infinite; }
+      .block:nth-child(2){animation:fadeInOut1 3s linear 0s infinite}
+      .block:nth-child(3){animation:fadeInOut2 3s linear 0s infinite}
+      .block:nth-child(4){animation:fadeInOut3 3s linear 0s infinite}
+      .block:nth-child(5){animation:fadeInOut4 3s linear 0s infinite}
+      .block:nth-child(6){animation:fadeInOut5 3s linear 0s infinite}
+      @keyframes fadeInOut{0%,15%{opacity:0;transform:scale(.5)}20%,100%{opacity:1;transform:scale(1)}}
+      @keyframes fadeInOut1{0%,30%{opacity:0;transform:scale(.5)}35%,100%{opacity:1;transform:scale(1)}}
+      @keyframes fadeInOut2{0%,45%{opacity:0;transform:scale(.5)}50%,100%{opacity:1;transform:scale(1)}}
+      @keyframes fadeInOut3{0%,60%{opacity:0;transform:scale(.5)}66%,100%{opacity:1;transform:scale(1)}}
+      @keyframes fadeInOut4{0%,75%{opacity:0;transform:scale(.5)}81%,100%{opacity:1;transform:scale(1)}}
+      @keyframes fadeInOut5{0%,90%{opacity:0;transform:scale(.5)}96%,100%{opacity:1;transform:scale(1)}}
+      #error-screen {
+        position: fixed; inset: 0; background: #52aaec;
+        display: none; flex-direction: column; align-items: center;
+        justify-content: center; gap: 16px; z-index: 200;
+        font-family: 'Segoe UI', sans-serif; text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="error-screen">
+      <h2 style="color:#fff;font-size:20px;">⚠️ 読み込みに失敗しました</h2>
+      <p style="color:#e0f0ff;font-size:14px;">CDN に接続できませんでした</p>
+    </div>
+    <div id="app-container" class="canvas-app-container">
+      <div id="canvas-container" class="canvas-app-canvas-container">
+        <canvas id="canvas" class="canvas-app-canvas" tabindex="1" width="590" height="960"></canvas>
+      </div>
+      <div class="buttons-background"></div>
+    </div>
+    <script>
+(function() {
+  var FALLBACKS = [
+    'https://cdn.jsdelivr.net/gh/kuru-bana/Games@main',
+    'https://raw.githubusercontent.com/kuru-bana/Games/main',
+    'https://github.com/kuru-bana/Games/raw/main'
+  ];
+  var idx = 0;
 
-function tryLoad() {
-  if (idx >= CDN_PROVIDERS.length) {
-    document.getElementById('pct').textContent = '読み込みに失敗しました';
-    document.getElementById('pct').style.color = '#ef4444';
-    return;
+  function showError() {
+    document.getElementById('error-screen').style.display = 'flex';
   }
-  var base = CDN_PROVIDERS[idx++];
-  document.getElementById('cdn-label').textContent =
-    (base.includes('jsdelivr') ? 'jsDelivr' : 'GitHub Raw') + ' から読み込み中...';
 
-  var ruffle = window.RufflePlayer && window.RufflePlayer.newest();
-  if (!ruffle) { setTimeout(tryLoad, 300); return; }
+  function tryLoad() {
+    if (idx >= FALLBACKS.length) { showError(); return; }
+    var base = FALLBACKS[idx++];
+    var s = document.createElement('script');
+    s.src = base + '/blocky-puzzle/dmloader.js';
+    s.onload = function() { startGame(base); };
+    s.onerror = tryLoad;
+    document.body.appendChild(s);
+  }
 
-  var player = ruffle.createPlayer();
-  player.style.width = '100%';
-  player.style.height = '100%';
-  document.getElementById('game-container').appendChild(player);
-  player.load(base + '/blocky-puzzle/game.swf').then(function() {
-    document.getElementById('loading-screen').style.display = 'none';
-    document.getElementById('game-container').style.display = 'block';
-  }).catch(function() {
-    player.remove();
-    tryLoad();
-  });
-}
+  function startGame(base) {
+    var progressBar = document.createElement('script');
+    progressBar.textContent = `
+      var originalAddProgress = Progress.addProgress;
+      Progress.addProgress = function(canvas) {
+        canvas.insertAdjacentHTML("afterend", '<div class="loading-screen-container" id="loading-screen-container"><div class="main-container"><img src="${base}/blocky-puzzle/game_logo.png" class="logo"><div class="message" id="percentage" style="margin-top:6px;">0%<\/div><div class="loading-bar"><div class="block"><\/div><div class="block"><\/div><div class="block"><\/div><div class="block"><\/div><div class="block"><\/div><div class="block"><\/div><\/div><\/div><\/div>');
+        Progress.progress = document.getElementById("loading-screen-container");
+        Progress.addListener(function(pct) {
+          var el = document.getElementById("percentage");
+          if (el) el.innerHTML = Math.min(Math.ceil(pct), 100) + "%";
+        });
+      };
+    `;
+    document.body.appendChild(progressBar);
 
-if (document.readyState === 'complete') {
+    var setup = document.createElement('script');
+    setup.textContent = `
+      var extra_params = {
+        archive_location_filter: function(path) { return "${base}/blocky-puzzle/archive" + path; },
+        engine_arguments: ["--verify-graphics-calls=false"],
+        custom_heap_size: 67108864,
+        full_screen_container: "#canvas-container",
+        disable_context_menu: true
+      };
+      Module["INITIAL_MEMORY"] = extra_params.custom_heap_size;
+      Module["onRuntimeInitialized"] = function() { Module.runApp("canvas", extra_params); };
+      Module["locateFile"] = function(path, scriptDirectory) {
+        if (path == "dmengine.wasm" || path == "dmengine_release.wasm" || path == "dmengine_headless.wasm") {
+          path = "blockypuzzle.wasm";
+        }
+        return "${base}/blocky-puzzle/" + path;
+      };
+      var prevW = -1, prevH = -1;
+      function resize_game_canvas() {
+        var container = document.getElementById("app-container");
+        var gameCanvas = document.getElementById("canvas");
+        var w = window.innerWidth, h = window.innerHeight;
+        if (prevW === w && prevH === h) return;
+        prevW = w; prevH = h;
+        container.style.width = w + "px"; container.style.height = h + "px";
+        gameCanvas.width = w; gameCanvas.height = h;
+      }
+      resize_game_canvas();
+      window.addEventListener("resize", resize_game_canvas, false);
+    `;
+    document.body.appendChild(setup);
+
+    var start = document.createElement('script');
+    start.textContent = `
+      EngineLoader.stream_wasm = true;
+      EngineLoader.load("canvas", "${base}/blocky-puzzle/blockypuzzle");
+    `;
+    document.body.appendChild(start);
+  }
+
   tryLoad();
-} else {
-  window.addEventListener('load', tryLoad);
-}
-</script>
-</body>
+})();
+    </script>
+  </body>
 </html>
