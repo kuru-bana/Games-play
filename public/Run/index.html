@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Run Games</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #060c18;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(135deg, #0c1a2e, #0e2240);
+      border-bottom: 1px solid #0ea5e922;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header .back {
+      color: #38bdf8;
+      text-decoration: none;
+      font-size: 13px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    header .back:hover { opacity: 1; }
+    header h1 {
+      font-size: 28px;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header .icon { font-size: 32px; }
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      padding: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .game-card {
+      background: linear-gradient(135deg, #0d1b2e, #112240);
+      border: 1px solid #0ea5e922;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .game-card:hover {
+      transform: translateY(-4px);
+      border-color: #0ea5e9;
+      box-shadow: 0 8px 32px #0ea5e933;
+    }
+    .game-card .thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #0a1520;
+      position: relative;
+      overflow: hidden;
+    }
+    .game-card .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+    .game-card:hover .thumb img { transform: scale(1.05); }
+    .game-card .thumb .badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #0ea5e9;
+      color: white;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .game-card .info { padding: 20px; }
+    .game-card .info h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .game-card .info p {
+      font-size: 13px;
+      color: #6b8aaa;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .game-card .info .play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #0284c7, #4f46e5);
+      color: white;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .game-card:hover .play-btn { opacity: 0.9; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="icon">🏃</span>
+  <h1>Run Games</h1>
+  <a class="back" href="../index.html" style="margin-left:auto">← ポータルトップ</a>
+</header>
+
+<div class="games-grid">
+
+  <a class="game-card" href="run-3-freezenova.html">
+    <div class="thumb">
+      <img src="https://freezenova.com/lessons/img2/run-freezenova.webp" alt="Run 3 Freezenova" onerror="this.style.display='none'">
+      <span class="badge">3D Runner</span>
+    </div>
+    <div class="info">
+      <h2>Run 3 Freezenova</h2>
+      <p>カラフルなトンネルをひたすら駆け抜ける高速ランナー。キャラアンロックやスコアアタックも楽しめる。</p>
+      <span class="play-btn">▶ プレイ</span>
+    </div>
+  </a>
+
+  <a class="game-card" href="run-3.html">
+    <div class="thumb">
+      <img src="https://freezenova.com/lessons/run3.webp" alt="Run 3" onerror="this.style.display='none'">
+      <span class="badge">Space Runner</span>
+    </div>
+    <div class="info">
+      <h2>Run 3</h2>
+      <p>宇宙のトンネルを走り抜ける！300以上のレベルのExploreモードと無限のInfiniteモードを収録。</p>
+      <span class="play-btn">▶ プレイ</span>
+    </div>
+  </a>
+
+  <a class="game-card" href="run-1.html">
+    <div class="thumb">
+      <img src="https://freezenova.com/lessons/img2/run-1-game.webp" alt="Run 1" onerror="this.style.display='none'">
+      <span class="badge">Classic</span>
+    </div>
+    <div class="info">
+      <h2>Run 1</h2>
+      <p>星空のトンネルを走る灰色のエイリアンを操作。穴に落ちないよう左右に移動してレベルを攻略せよ！</p>
+      <span class="play-btn">▶ プレイ</span>
+    </div>
+  </a>
+
+</div>
+
+</body>
+</html>
