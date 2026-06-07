@@ -7,6 +7,14 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; background: #0a0a00; overflow: hidden; }
+    #back-btn {
+      position: fixed; top: 12px; left: 12px; z-index: 1000;
+      background: rgba(0,0,0,0.75); color: #fff; border: 1px solid #a3a300;
+      padding: 8px 16px; border-radius: 8px; font-size: 13px;
+      cursor: pointer; text-decoration: none; font-family: 'Segoe UI', sans-serif;
+      transition: background 0.2s;
+    }
+    #back-btn:hover { background: #5c5c00; }
     #loading-screen {
       position: fixed; inset: 0; background: #0a0a00;
       display: flex; flex-direction: column; align-items: center;
@@ -24,42 +32,33 @@
     }
     #loading-screen .pct { font-family: monospace; color: #6a6a00; font-size: 13px; }
     #loading-screen .cdn-label { font-family: monospace; color: #3a3a00; font-size: 11px; }
+    #error-screen {
+      position: fixed; inset: 0; background: #0a0a00;
+      display: none; flex-direction: column; align-items: center;
+      justify-content: center; gap: 16px; z-index: 200;
+      font-family: 'Segoe UI', sans-serif; text-align: center;
+    }
     .webgl-content { width: 100%; height: 100%; }
     #gameContainer { width: 100%; height: 100%; display: none; }
   </style>
 </head>
 <body>
+<a href="index.html" id="back-btn">← Backroom 一覧</a>
 <div id="loading-screen">
   <h2>🏚️ The Backrooms</h2>
   <div class="progress-wrap"><div class="progress-fill" id="pf"></div></div>
   <div class="pct" id="pct">0%</div>
   <div class="cdn-label" id="cdn-label">CDNに接続中...</div>
 </div>
+<div id="error-screen">
+  <h2 style="color:#ef4444;font-size:20px;">⚠️ 読み込みに失敗しました</h2>
+  <p style="color:#888;font-size:14px;">jsDelivr・GitHub Raw どちらも応答なし</p>
+</div>
 <div class="webgl-content">
   <div id="gameContainer"></div>
 </div>
+<script src="../config.js"></script>
 <script>
-var CDN_PROVIDERS = [
-  "https://cdn.jsdelivr.net/gh/kuru-bana/Games@main",
-  "https://raw.githubusercontent.com/kuru-bana/Games/main"
-];
-
-function loadWithFallback(subpath, onSuccess, onFail) {
-  var providers = CDN_PROVIDERS.slice(), idx = 0;
-  function tryNext() {
-    if (idx >= providers.length) { if (onFail) onFail(); return; }
-    var base = providers[idx++];
-    document.getElementById('cdn-label').textContent =
-      (base.includes('jsdelivr') ? 'jsDelivr' : 'GitHub Raw') + ' から読み込み中...';
-    var s = document.createElement('script');
-    s.src = base + subpath;
-    s.onload = function() { onSuccess(base); };
-    s.onerror = tryNext;
-    document.body.appendChild(s);
-  }
-  tryNext();
-}
-
 (function() {
   var started = false;
   function showGame() {
@@ -69,9 +68,8 @@ function loadWithFallback(subpath, onSuccess, onFail) {
     document.getElementById('gameContainer').style.display = 'block';
   }
   function showError() {
-    document.getElementById('loading-screen').innerHTML =
-      '<h2 style="color:#ef4444;font-family:sans-serif;">⚠️ 読み込みに失敗しました</h2>' +
-      '<p style="color:#888;font-family:sans-serif;font-size:13px;">jsDelivr・GitHub Raw どちらも応答なし</p>';
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('error-screen').style.display = 'flex';
   }
   function ourProgress(instance, progress) {
     if (typeof progress === 'number') {
@@ -84,9 +82,13 @@ function loadWithFallback(subpath, onSuccess, onFail) {
     }
   }
 
-  loadWithFallback('/the-backrooms/Build/UnityLoader.js',
+  window.loadWithFallback('/the-backrooms/Build/UnityLoader.js',
     function(base) {
+      document.getElementById('cdn-label').textContent =
+        (base.includes('jsdelivr') ? 'jsDelivr' : 'GitHub Raw') + ' から読み込み中...';
       var B = base + '/the-backrooms/Build';
+      var T = base + '/the-backrooms/TemplateData';
+
       var gameConfig = {
         companyName: "IEP",
         productName: "Backrooms",
@@ -100,10 +102,15 @@ function loadWithFallback(subpath, onSuccess, onFail) {
         backgroundColor: "#0a0a00"
       };
       var blob = new Blob([JSON.stringify(gameConfig)], { type: 'application/json' });
-      UnityLoader.instantiate("gameContainer", URL.createObjectURL(blob), {
+      var configUrl = URL.createObjectURL(blob);
+
+      UnityLoader.instantiate("gameContainer", configUrl, {
         onProgress: ourProgress,
-        Module: { onRuntimeInitialized: function() { showGame(); } }
+        Module: {
+          onRuntimeInitialized: function() { showGame(); }
+        }
       });
+
       setTimeout(showGame, 60000);
     },
     showError
