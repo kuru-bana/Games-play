@@ -84,11 +84,24 @@
     container.style.height = canvas.style.height = h + 'px';
   }
 
-  window.loadWithFallback('/nso_fix/Build/nsoweather2.loader.js',
-    function(base) {
-      document.getElementById('cdn-label').textContent =
-        (base.includes('jsdelivr') ? 'jsDelivr' : 'GitHub Raw') + ' から読み込み中...';
-      var B = base + '/nso_fix/Build';
+  var NSO_PROVIDERS = [
+    "https://raw.githubusercontent.com/kuru-bana/Games/main",
+    "https://cdn.jsdelivr.net/gh/kuru-bana/Games@main"
+  ];
+  var nsoIdx = 0;
+  function tryNSO() {
+    if (nsoIdx >= NSO_PROVIDERS.length) {
+      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('error-screen').style.display = 'flex';
+      return;
+    }
+    var base = NSO_PROVIDERS[nsoIdx++];
+    document.getElementById('cdn-label').textContent =
+      (base.includes('jsdelivr') ? 'jsDelivr' : 'GitHub Raw') + ' から読み込み中...';
+    var B = base + '/nso_fix/Build';
+    var s = document.createElement('script');
+    s.src = B + '/nsoweather2.loader.js';
+    s.onload = function() {
       config.dataUrl      = B + '/nsoweather2.data.unityweb';
       config.frameworkUrl = B + '/nsoweather2.framework.js.unityweb';
       config.codeUrl      = B + '/nsoweather2.wasm.unityweb';
@@ -97,13 +110,15 @@
         document.getElementById('gameContainer').style.display = 'block';
         onResize();
         window.gameInstance = instance;
-      }).catch(function(err) { console.error('Unity error:', err); });
-    },
-    function() {
-      document.getElementById('loading-screen').style.display = 'none';
-      document.getElementById('error-screen').style.display = 'flex';
-    }
-  );
+      }).catch(function(err) {
+        console.error('Unity error:', err);
+        tryNSO();
+      });
+    };
+    s.onerror = tryNSO;
+    document.body.appendChild(s);
+  }
+  tryNSO();
   window.addEventListener('resize', onResize);
 })();
 </script>
