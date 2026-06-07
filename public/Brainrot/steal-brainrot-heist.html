@@ -163,13 +163,8 @@
     return;
   }
 
-  var BASE = cdn + '/steal-brainrot-heist/Build';
-
   var canvas = document.querySelector('#unity-canvas');
   var config = {
-    dataUrl: BASE + '/game.data.unityweb',
-    frameworkUrl: BASE + '/game.framework.js.unityweb',
-    codeUrl: BASE + '/game.wasm.unityweb',
     streamingAssetsUrl: 'StreamingAssets',
     companyName: 'FreezeNova',
     productName: 'Steal Brainrot Heist',
@@ -195,25 +190,26 @@
     container.style.left = Math.floor((window.innerWidth - w) / 2) + 'px';
   }
 
-  var loaderScript = document.createElement('script');
-  loaderScript.src = BASE + '/game.loader.js';
-  loaderScript.onload = function() {
-    createUnityInstance(canvas, config, progressHandler).then(function(instance) {
-      document.getElementById('loading-screen').style.display = 'none';
-      document.getElementById('gameContainer').style.display = 'block';
-      canvas = instance.Module.canvas;
-      onResize();
-      window.gameInstance = instance;
-    }).catch(function(err) {
-      console.error('Unity load error:', err);
-    });
-  };
-  loaderScript.onerror = function() {
-    document.getElementById('loading-screen').innerHTML =
-      '<h2 style="color:#ef4444;font-family:sans-serif;">CDNからの読み込みに失敗しました</h2>' +
-      '<p style="color:#888;font-family:sans-serif;font-size:13px;">GitHubリポジトリがpublicか確認してください</p>';
-  };
-  document.body.appendChild(loaderScript);
+  window.loadWithFallback('/steal-brainrot-heist/Build/game.loader.js',
+    function(activeBase) {
+      var B = activeBase + '/steal-brainrot-heist/Build';
+      config.dataUrl      = B + '/game.data.unityweb';
+      config.frameworkUrl = B + '/game.framework.js.unityweb';
+      config.codeUrl      = B + '/game.wasm.unityweb';
+      createUnityInstance(canvas, config, progressHandler).then(function(instance) {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('gameContainer').style.display = 'block';
+        canvas = instance.Module.canvas;
+        onResize();
+        window.gameInstance = instance;
+      }).catch(function(err) { console.error('Unity load error:', err); });
+    },
+    function() {
+      document.getElementById('loading-screen').innerHTML =
+        '<h2 style="color:#ef4444;font-family:sans-serif;">CDNからの読み込みに失敗しました</h2>' +
+        '<p style="color:#888;font-family:sans-serif;font-size:13px;">jsDelivr・GitHub Raw どちらも応答なし</p>';
+    }
+  );
 
   window.addEventListener('resize', onResize);
 
