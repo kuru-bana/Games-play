@@ -1,0 +1,12 @@
+Exception:
+nsoweather2.loader.js:1 System.Exception: Error: called non-existent method System.Int32 Rewired.Player/ControllerHelper/NFPuEQMQvXNXInIMNvlwzODgHllJ`2<Rewired.CustomController,Rewired.CustomControllerMap>::pWTuIVffZPYpHPQnPtQZYpChAOfP()
+nsoweather2.loader.js:1   at Rewired.Player+ControllerHelper+NFPuEQMQvXNXInIMNvlwzODgHllJ`2[,].pWTuIVffZPYpHPQnPtQZYpChAOfP () [0x00000] in <00000000000000000000000000000000>:0 
+nsoweather2.loader.js:1 ------- Rewired System Info -------
+nsoweather2.loader.js:1 Unity version: 2022.3.22f1
+nsoweather2.loader.js:1 Rewired version: 1.1.45.3.U2021
+nsoweather2.loader.js:1 Platform: Windows
+nsoweather2.loader.js:1 Using Unity input: True
+nsoweather2.loader.js:1 Primary input source: RawInput
+nsoweather2.loader.js:1 Use XInput: True
+nsoweather2.loader.js:1 Native mouse handling: True
+nsoweather2.loader.js:1 Enhanced device support: True
