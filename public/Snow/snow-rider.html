@@ -45,6 +45,7 @@
     div#gameContainer {
       background: transparent !important; position: absolute;
       top: 0 !important; width: 100% !important; height: 100% !important; left: 0 !important;
+      visibility: hidden; opacity: 0;
     }
     div#gameContainer canvas { position: absolute; width: 100% !important; height: 100% !important; }
   </style>
@@ -62,7 +63,7 @@
   <h2 style="color:#ef4444;font-size:20px;">⚠️ 読み込みに失敗しました</h2>
   <p style="color:#888;font-size:14px;">jsDelivr・GitHub Raw どちらも応答なし</p>
 </div>
-<div id="gameContainer" style="display:none;">
+<div id="gameContainer">
   <canvas id="unity-canvas" data-pixel-art=""></canvas>
 </div>
 <script src="../config.js"></script>
@@ -93,11 +94,16 @@
       config.frameworkUrl      = B + '/snowrider3d_gd_4_2.framework.js.unityweb';
       config.codeUrl           = B + '/snowrider3d_gd_4_2.wasm.unityweb';
       config.streamingAssetsUrl = base + '/snow-rider/StreamingAssets';
+      onResize();
       createUnityInstance(canvas, config, progressHandler).then(function(instance) {
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('gameContainer').style.display = 'block';
-        onResize();
         window.gameInstance = instance;
+        setTimeout(function() {
+          document.getElementById('loading-screen').style.display = 'none';
+          var gc = document.getElementById('gameContainer');
+          gc.style.visibility = 'visible';
+          gc.style.opacity = '1';
+          onResize();
+        }, 1000);
       }).catch(function(err) {
         console.error('Unity error:', err);
         document.getElementById('loading-screen').style.display = 'none';
