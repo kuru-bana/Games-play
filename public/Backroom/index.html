@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backroom Games</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #080800; color: #fff; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+    header {
+      background: linear-gradient(135deg, #100f00, #1a1800);
+      border-bottom: 1px solid #d4d40022;
+      padding: 20px 40px; display: flex; align-items: center; gap: 16px;
+    }
+    header .back { color: #d4d400; text-decoration: none; font-size: 13px; opacity: 0.7; transition: opacity 0.2s; }
+    header .back:hover { opacity: 1; }
+    header h1 {
+      font-size: 28px;
+      background: linear-gradient(90deg, #d4d400, #a3a300);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    header .icon { font-size: 32px; }
+    .games-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px; padding: 40px; max-width: 1200px; margin: 0 auto;
+    }
+    .game-card {
+      background: linear-gradient(135deg, #100f00, #1a1800);
+      border: 1px solid #d4d40022; border-radius: 16px; overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      text-decoration: none; color: inherit; display: block;
+    }
+    .game-card:hover { transform: translateY(-4px); border-color: #d4d400; box-shadow: 0 8px 32px #d4d40033; }
+    .game-card .thumb { width: 100%; aspect-ratio: 16/9; background: #0d0c00; position: relative; overflow: hidden; }
+    .game-card .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s; }
+    .game-card:hover .thumb img { transform: scale(1.05); }
+    .game-card .thumb .badge {
+      position: absolute; top: 12px; right: 12px; background: #d4d400; color: #000;
+      font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600;
+    }
+    .game-card .info { padding: 20px; }
+    .game-card .info h2 {
+      font-size: 18px; margin-bottom: 8px;
+      background: linear-gradient(90deg, #d4d400, #a3a300);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .game-card .info p { font-size: 13px; color: #7a7a00; line-height: 1.6; margin-bottom: 16px; }
+    .game-card .info .play-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #5c5c00, #3d3d00);
+      color: #d4d400; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: opacity 0.2s;
+    }
+    .game-card:hover .play-btn { opacity: 0.9; }
+  </style>
+</head>
+<body>
+<header>
+  <span class="icon">🏚️</span>
+  <h1>Backroom Games</h1>
+  <a class="back" href="../index.html" style="margin-left:auto">← ポータルトップ</a>
+</header>
+<div class="games-grid">
+
+  <a class="game-card" href="the-backrooms.html">
+    <div class="thumb">
+      <img src="https://67games.io/public/upload/game/thumb-jVhUhdog78.png" alt="The Backrooms" onerror="this.style.display='none'">
+      <span class="badge">Horror</span>
+    </div>
+    <div class="info">
+      <h2>The Backrooms</h2>
+      <p>薄黄色の壁が延々と続く不気味な空間を探索するホラーゲーム。出口はあるのか…？</p>
+      <span class="play-btn">▶ プレイ</span>
+    </div>
+  </a>
+
+</div>
+</body>
+</html>
