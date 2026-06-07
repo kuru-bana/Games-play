@@ -52,7 +52,7 @@
     <a href="index.html" id="back-btn">← Block ゲーム一覧</a>
     <div id="error-screen">
       <h2 style="color:#fff;font-size:20px;">⚠️ 読み込みに失敗しました</h2>
-      <p style="color:#e0f0ff;font-size:14px;">CDN に接続できませんでした</p>
+      <p style="color:#e0f0ff;font-size:14px;">blockypuzzle_wasm.js がリポジトリにまだありません</p>
     </div>
     <div id="app-container" class="canvas-app-container">
       <div id="canvas-container" class="canvas-app-canvas-container">
@@ -63,8 +63,8 @@
     <script src="../config.js"></script>
     <script>
 (function() {
-  var CDN_BASE = 'https://raw.githubusercontent.com/kuru-bana/Games/main';
   var FALLBACKS = [
+    '/gh-proxy/kuru-bana/Games/main',
     'https://raw.githubusercontent.com/kuru-bana/Games/main',
     'https://github.com/kuru-bana/Games/raw/main'
   ];
@@ -79,10 +79,7 @@
     var base = FALLBACKS[idx++];
     var s = document.createElement('script');
     s.src = base + '/blocky-puzzle/dmloader.js';
-    s.onload = function() {
-      CDN_BASE = base;
-      startGame(base);
-    };
+    s.onload = function() { startGame(base); };
     s.onerror = tryLoad;
     document.body.appendChild(s);
   }
